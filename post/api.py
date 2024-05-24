@@ -11,8 +11,16 @@ from .serializers import PostSerializer
 
 @api_view(['GET'])
 def post_list(request):
-    posts = Post.object.all()
+    posts = Post.objects.all()
 
     serializer = PostSerializer(posts, many = True)
 
-    return JsonResponse({'data': serializer.data})
+    return JsonResponse(serializer.data, safe=False)
+
+@api_view(['POST'])
+def post_create(request):
+    data = request.data
+
+    print(data)
+
+    return JsonResponse({'hello': 'heep'})
