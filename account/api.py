@@ -19,8 +19,7 @@ def me(request):
 def signup(request):
     data = request.data
     message = 'success'
-
-    form = SignupForm({
+         form = SignupForm({
         'email': data.get('email'),
         'name': data.get('name'),
         'password1': data.get('password1'),
