@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 from .forms import SignupForm
+from .models import User, FriendshipRequest
 
 @api_view(['GET'])
 def me(request):
@@ -19,6 +20,7 @@ def me(request):
 def signup(request):
     data = request.data
     message = 'success'
+
     form = SignupForm({
         'email': data.get('email'),
         'name': data.get('name'),
@@ -28,10 +30,32 @@ def signup(request):
 
     if form.is_valid():
         user = form.save()
-    else:
-        message = 'error'
+        user.is_active = True
+        user.save()
+
         
+    else:
+        message = form.errors.as_json()
     
+    print(message)
+
+    return JsonResponse({'message': message}, safe=False)
 
 
-    return JsonResponse({'message': message},safe=False)
+@api_view(['GET'])
+def friends(request, pk):
+    user = User.objects.get(pk=pk)
+    requests = []
+
+    if user == request.user:
+        requests = FriendshipRequest.objects.filter(created_for=request.user, status=FriendshipRequest.SENT)
+        requests = FriendshipRequestSerializer(requests, many=True)
+        requests = requests.data
+
+    friends = user.friends.all()
+
+    return JsonResponse({
+        'user': UserSerializer(user).data,
+        'friends': UserSerializer(friends, many=True).data,
+        'requests': requests
+    }, safe=False)
