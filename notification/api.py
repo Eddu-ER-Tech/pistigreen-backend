@@ -20,4 +20,4 @@ def read_notification(request, pk):
     notification.is_read = True
     notification.save()
 
-    return JsonResponse({'message': 'notification read'})
+    return JsonResponse({'message': 'notificacion leída'})

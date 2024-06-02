@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.http import HttpResponse
 from django.shortcuts import render
 
@@ -14,6 +13,6 @@ def activateemail(request):
         user.is_active = True
         user.save()
     
-        return HttpResponse('The user is now activated. You can go ahead and log in!')
+        return HttpResponse('El usuario ahora está activado. Puedes seguir adelante e iniciar sesión.')
     else:
-        return HttpResponse('The parameters is not valid!')
+        return HttpResponse('¡Los parámetros no son válidos!')
