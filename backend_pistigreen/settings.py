@@ -1,49 +1,39 @@
 from datetime import timedelta
 from pathlib import Path
+import environ
+import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Inicializar la instancia de environ
+env = environ.Env()
+
+# Definir la ruta base del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Leer el archivo .env adecuado
+environ.Env.read_env(os.path.join(BASE_DIR, '.env.production'))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+# Configurar las variables de entorno
+DEBUG = env.bool("DEBUG", default=False)
+SECRET_KEY = env("SECRET_KEY")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS")
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
+WEBSITE_URL = env("WEBSITE_URL")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#pbrx7%m@4%-s4d_%vxq-z$6ost(b6jjee!+id^d28cmq*jgmc'
+EMAIL_BACKEND = env("EMAIL_BACKEND")
+if EMAIL_BACKEND == "django.core.mail.backends.smtp.EmailBackend":
+    EMAIL_HOST = env("EMAIL_HOST")
+    EMAIL_PORT = env("EMAIL_PORT")
+    EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+    EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-ALLOWED_HOSTS = []
-
-WEBSITE_URL = 'http://127.0.0.1:8000'
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-AUTH_USER_MODEL = 'account.User'
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=180),
-    'ROTATE_REFRESH_TOKENS': False,
+# Configuración de la base de datos
+DATABASES = {
+    'default': env.db()
 }
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    )
-}
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8080",
-]
 
 # Application definition
 
@@ -94,21 +84,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend_pistigreen.wsgi.application'
 
+AUTH_USER_MODEL = 'account.User'
 
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=env.int('ACCESS_TOKEN_LIFETIME', 30)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=env.int('REFRESH_TOKEN_LIFETIME', 180)),
+    'ROTATE_REFRESH_TOKENS': env.bool('ROTATE_REFRESH_TOKENS', False),
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}
 
 # Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -124,27 +118,24 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
 STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuración específica de seguridad para producción
+SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', True)
+SESSION_COOKIE_SECURE = env.bool('SESSION_COOKIE_SECURE', True)
+CSRF_COOKIE_SECURE = env.bool('CSRF_COOKIE_SECURE', True)
+SECURE_BROWSER_XSS_FILTER = env.bool('SECURE_BROWSER_XSS_FILTER', True)
+SECURE_CONTENT_TYPE_NOSNIFF = env.bool('SECURE_CONTENT_TYPE_NOSNIFF', True)
+X_FRAME_OPTIONS = env('X_FRAME_OPTIONS', 'DENY')
